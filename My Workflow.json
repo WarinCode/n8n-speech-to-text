@@ -1,0 +1,264 @@
+{
+  "name": "My Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "45e6684d-6fd4-4f0c-a82a-4520e25c4793",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "a8372689-a26d-469c-a97f-37db1c3b150c",
+      "name": "Webhook",
+      "webhookId": "45e6684d-6fd4-4f0c-a82a-4520e25c4793"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=จงตอบคำถามของข้อความจาก user ต่อไปนี้ {{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1360,
+        0
+      ],
+      "id": "42cd606b-96a6-4be2-a058-c24ff9f761ad",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1424,
+        224
+      ],
+      "id": "e4e5617c-fef7-4398-ae97-27836dd57d46",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yLcWkFZa1TblkHxd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer 9CroNzewSDjt6u9zi6YUjajucviyKcj0L72jo5gipv8jzpT7bNl9a+cTe6SQkjm7BLNeuFn4JuAfqsxxIaYwjKFySweHq9Dzitc8IcAcTavKFGDjlgk1COcSCKwTKocertLsG/c96hf6EQFJXV2BwgdB04t89/1O/w1cDnyilFU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Webhook').item.json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": {{ $json.output.toJsonString() }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1808,
+        0
+      ],
+      "id": "97d7f81d-8f18-49f9-8d9b-44f0a0e02d46",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "3e863efa-7c4a-4bb5-aa16-6da1b57eaaa0",
+      "name": "Analyze audio",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "k7HMnee4i8niXJIG",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        208
+      ],
+      "id": "85c905e6-6eb0-4a63-b321-9782469cbd45",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "yLcWkFZa1TblkHxd",
+          "name": "OpenAi account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api-data.line.me/v2/bot/message/{{ $json.body.events[0].message.id }}/content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 9CroNzewSDjt6u9zi6YUjajucviyKcj0L72jo5gipv8jzpT7bNl9a+cTe6SQkjm7BLNeuFn4JuAfqsxxIaYwjKFySweHq9Dzitc8IcAcTavKFGDjlgk1COcSCKwTKocertLsG/c96hf6EQFJXV2BwgdB04t89/1O/w1cDnyilFU="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        800,
+        0
+      ],
+      "id": "8f71d4df-326d-4b72-83ee-85f9123cf2fa",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        224
+      ],
+      "id": "450b62d3-c848-43ff-8a20-c6adc03d1628",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "k7HMnee4i8niXJIG",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze audio": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Analyze audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "18d4f4c4-009d-4050-acae-a511eac3a918",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f5de576d540e63df2f5c9336c6b1cb51e46ed83bb6673011adbd37094f6a2e7"
+  },
+  "id": "ZMAtdXDkg68p1aQO",
+  "tags": []
+}
